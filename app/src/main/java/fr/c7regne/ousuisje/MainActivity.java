@@ -7,15 +7,9 @@ import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.telephony.SmsManager;
 import android.util.Log;
-import android.widget.Switch;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.ImageFormat;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -28,7 +22,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.location.Location;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
@@ -36,32 +29,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.util.Size;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
-import android.view.accessibility.CaptioningManager;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -70,8 +49,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.net.ssl.SSLContext;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener {
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
     private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
@@ -80,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
+    private TextView phone;
     private Button btnSendSMS,settingSMS,btnCamera;
     private TextureView textureView;
     private static final SparseIntArray ORIENT=new SparseIntArray();
@@ -160,11 +142,14 @@ public class MainActivity extends AppCompatActivity {
                 SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
             }
         });
+        phone = findViewById(R.id.phone);
+        phone.setText(SMSSender.getNumber());
         settingSMS = (Button) findViewById(R.id.settingSMS);
         settingSMS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SMSSender.setNumber("0781071100");
+                //"0781071100"
+                openDialogNumber();
             }
         });
 
@@ -177,12 +162,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //takePicture();
+                SMSSender.sendSMS(getApplicationContext(), "AU SECOURS AIDEZ MOI , COORD : latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude()+"\nC'est urgent !!!!!!!!!!!!");
                 Toast.makeText(MainActivity.this, "Sending an urgence SMS", Toast.LENGTH_SHORT).show();
             }
         });
         new FallDetection(this,mSensorManager, mAccelerometer);
     }//onCreate()
 
+    private void openDialogNumber() {
+        DialogNumber dialogNumber=new DialogNumber();
+        dialogNumber.show(getSupportFragmentManager(),"dialog");
+    }
+    @Override
+    public void applyTexts(String phoneNumber) {
+        SMSSender.setNumber(phoneNumber);
+        phone.setText(SMSSender.getNumber());
+    }
 
 
     private void openCamera() {
@@ -431,4 +426,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
