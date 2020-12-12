@@ -1,34 +1,126 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="fr.c7regne.ousuisje.MainActivity" >
-
-    <TextView
-        android:id="@+id/welcome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bonjour"
-        android:textSize="40sp"
-        android:layout_gravity="center"/>
-
-    <Button
+    tools:context=".MainActivity">
+  
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_sms"
-        android:text="Send SMS"
-        ></Button>
+        android:id="@+id/layout1">
+        <TextView
+            android:id="@+id/txtLatitude"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Latitude : "
+            />
+        <TextView
+            android:id="@+id/latitude"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Not available"
+           />
 
+    </LinearLayout>
 
-    <TextView
-        android:id="@+id/phone"
+    <LinearLayout
+        android:id="@+id/layout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout1">
+        <TextView
+            android:id="@+id/txtLongitude"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Longitude : " />
+        <TextView
+            android:id="@+id/longitude"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Not available" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout2">
+        <TextView
+            android:id="@+id/txtAccuracy"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Accuracy : "/>
+        <TextView
+            android:id="@+id/accuracy"
+            android:layout_width="0px"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="Not available" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/layout3"
+        android:orientation="vertical">
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn_sms"
+            android:text="Send SMS"
+            />
 
-    <TextView
-        android:id="@+id/message"
+
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phone"/>
+
+        <TextView
+            android:id="@+id/message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Message recieved"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnUpdateGPS"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Start Tracking"
+        android:layout_below="@+id/layout3"
+        android:layout_alignParentRight="true"/>
 
-</LinearLayout>
+    <Button
+        android:id="@+id/btnStopGPS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop Traking"
+        android:layout_below="@+id/btnUpdateGPS"
+        android:layout_alignParentRight="true"/>
+
+    <TextureView
+        android:id="@+id/imageView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/btnStopGPS"/>
+
+    <Button
+        android:id="@+id/urgenceSMS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Urgence SMS"
+        android:layout_above="@+id/imageView"
+        android:layout_centerInParent="true"
+        android:layout_alignParentBottom="true"/>
+  
+</RelativeLayout>
