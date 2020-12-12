@@ -95,6 +95,7 @@ public class GPS {
             Toast.makeText(context,"You must activate your geolocalisation", Toast.LENGTH_SHORT).show();
         }
     }
+
     //update the view with the new coords
     private void updateCoords(Location location) {
         txtLatitude.setText(String.valueOf(location.getLatitude()));
