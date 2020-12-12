@@ -1,6 +1,7 @@
 package fr.c7regne.ousuisje;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -54,7 +55,7 @@ public class GPS {
 
         getGPScoord();
 
-        //for setting traking gps coord
+        //for setting tracking gps coord
         locationCallBack = new LocationCallback(){
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -63,8 +64,9 @@ public class GPS {
             }
         };
 
-        //for stopping traking gps coord
+        //for stopping tracking gps coord
         btnUpdateGPS.setOnClickListener(new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
             @Override
             public void onClick(View v) {
                 fusedLocationProviderClient.requestLocationUpdates(locationRequest,locationCallBack,null);
