@@ -67,6 +67,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/layout4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/layout3"
@@ -91,7 +92,14 @@
             android:layout_height="wrap_content"
             android:text="Message recieved"/>
     </LinearLayout>
-
+    <Button
+        android:id="@+id/settingSMS"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Setting Number"
+        android:layout_toRightOf="@+id/layout4"
+        android:layout_toLeftOf="@id/btnUpdateGPS"
+        android:layout_below="@+id/layout3"/>
     <Button
         android:id="@+id/btnUpdateGPS"
         android:layout_width="wrap_content"

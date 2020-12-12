@@ -24,7 +24,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 public class GPS {
 
     private static final String TAG = "Test";
-
+    public static Location loc;
     private TextView txtLatitude, txtLongitude,txtAccuracy;
     private Button btnUpdateGPS,btnStopGPS;
 
@@ -89,10 +89,11 @@ public class GPS {
                 @Override
                 public void onSuccess(Location location) {
                     updateCoords(location);
+                    loc=location;
                 }
             });
         }else{
-            Toast.makeText(context,"You must activate your geolocalisation", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context,"You must permit your geolocalisation", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -101,6 +102,15 @@ public class GPS {
         txtLatitude.setText(String.valueOf(location.getLatitude()));
         txtLongitude.setText(String.valueOf(location.getLongitude()));
         txtAccuracy.setText(String.valueOf(location.getAccuracy()));
+    }
+
+    public String getLatitude(){
+        getGPScoord();
+        return String.valueOf(loc.getLatitude());
+    }
+    public String getLongitude(){
+        getGPScoord();
+        return String.valueOf(loc.getLongitude());
     }
 
 
