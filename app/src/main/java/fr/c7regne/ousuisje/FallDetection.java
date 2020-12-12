@@ -31,6 +31,7 @@ public class FallDetection implements SensorEventListener {
             Toast.makeText(c, "Device fall, sending message", Toast.LENGTH_SHORT).show();
         }
         vAz=Az;
+
         //Log.v( TAG , " TimeAcc = " + event.timestamp + " Ax = " + Ax + " " + " Ay = " + Ay + " " + " Az = " + Az ) ;
     }
 
