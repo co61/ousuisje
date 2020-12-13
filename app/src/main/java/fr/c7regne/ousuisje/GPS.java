@@ -36,6 +36,16 @@ public class GPS {
     Context context;
     View v;
 
+    public GPS(Context c){
+        context=c;
+        locationRequest=new LocationRequest();
+        locationRequest.setInterval(3000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        getGPScoord();
+    }
+
     public GPS(Context c, View view) {
         //set context and view
         context=c;

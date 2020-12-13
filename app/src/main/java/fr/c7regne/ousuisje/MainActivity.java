@@ -52,7 +52,7 @@ import java.util.UUID;
 import javax.net.ssl.SSLContext;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener {
+public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener, SmsReceiver.smsReceiveListener{
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
     private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
@@ -428,4 +428,9 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
     }
 
 
+    @Override
+    public void returnSMS(String phoneNumber, String phoneMessage) {
+        SMSSender.setNumber(phoneNumber);
+        SMSSender.sendSMS(this, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
+    }
 }
