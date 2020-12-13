@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.telephony.SmsMessage;
+import android.util.Log;
 import android.widget.Toast;
 
 
@@ -20,12 +21,7 @@ public class SmsReceiver extends BroadcastReceiver {
         String smsBody = "";
 
 
-        try {
-            mSmsReceiveListener = (smsReceiveListener)context;
-        }catch (ClassCastException e){
-            throw new ClassCastException(context.toString()+"Implement smsReceiveListener");
-        }
-
+       // mSmsReceiveListener = new smsReceiveListener;
 
         if (bundle != null) {
             Object[] sms = (Object[]) bundle.get("pdus");
@@ -38,6 +34,7 @@ public class SmsReceiver extends BroadcastReceiver {
                 smsBody = smsMessage.getMessageBody().toString();
                 smsNumber = smsMessage.getOriginatingAddress().toString();
 
+
                 messageSms += "SMS From: " + smsNumber + "\n";
                 messageSms += smsBody + "\n";
             }
@@ -46,7 +43,7 @@ public class SmsReceiver extends BroadcastReceiver {
 
         Toast.makeText(context, messageSms, Toast.LENGTH_LONG).show();
         //GPS gps = new GPS(context);
-        if (smsBody == "ousuisje") {
+        if (smsBody.equals("ousuisje")) {
 
             Toast.makeText(context,"send SMS in return", Toast.LENGTH_LONG).show();
             //SMSSender.setNumber(smsNumber);
