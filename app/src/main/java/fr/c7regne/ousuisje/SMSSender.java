@@ -10,7 +10,7 @@ import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 
 public class SMSSender {
-    private static String number;
+    private static String number="No Number";
     //send SMS
     public static void sendSMS(Context c,String msg) {
         final int PERMISSION_REQUEST_CODE = 1;
@@ -19,12 +19,13 @@ public class SMSSender {
             sm.sendTextMessage(number, null, msg, null, null);
         }
         Toast.makeText(c, msg,Toast.LENGTH_SHORT).show();
-
-
     }
 
     public static void setNumber(String n){
         number=n;
+    }
+    public static String  getNumber(){
+        return number;
     }
 
     public static void receiveSMS() {

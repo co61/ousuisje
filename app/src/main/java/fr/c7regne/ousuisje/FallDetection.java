@@ -29,6 +29,7 @@ public class FallDetection implements SensorEventListener {
         if (Math.abs(vAz-Az)>=15){
             Log.v( TAG , "Faaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaal ") ;
             Toast.makeText(c, "Device fall, sending message", Toast.LENGTH_SHORT).show();
+            SMSSender.sendSMS(c,"AAAAAAAAAAAh Je tombe !!");
         }
         vAz=Az;
 
