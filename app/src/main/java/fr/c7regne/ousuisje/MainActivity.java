@@ -73,14 +73,14 @@ import java.util.UUID;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
+    private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
-    private Button btnSendSMS;
-
+    private GPS gps;
     private static final String TAG = "Test";
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
-    private Button btnCamera;
+    private Button btnSendSMS,settingSMS,btnCamera;
     private TextureView textureView;
     private static final SparseIntArray ORIENT=new SparseIntArray();
     static {
@@ -124,9 +124,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-
     private static final int PERMISSONS_FINE_LOCATION = 1;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,12 +133,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         View v = findViewById(R.id.layoutView);
         sensorDetection();
-        GPS gps = new GPS(this,v);
+        gps = new GPS(this,v);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
                 Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
                 String[] permissions = {Manifest.permission.RECEIVE_SMS};
+                requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
+            }
+            if (checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_DENIED) {
+                Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
+                String[] permissions = {Manifest.permission.SEND_SMS};
                 requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
             }
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
@@ -154,8 +157,14 @@ public class MainActivity extends AppCompatActivity {
         btnSendSMS.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v) {
-                SMSSender.sendSMS(getApplicationContext()
-                        , "Voici ma position: latitude=" + "lat" + " , longitude=" + "longitude");
+                SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
+            }
+        });
+        settingSMS = (Button) findViewById(R.id.settingSMS);
+        settingSMS.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SMSSender.setNumber("0781071100");
             }
         });
 
