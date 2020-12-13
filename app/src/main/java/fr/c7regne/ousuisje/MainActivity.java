@@ -6,6 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.content.Context;
@@ -52,7 +55,7 @@ import java.util.UUID;
 import javax.net.ssl.SSLContext;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener, SmsReceiver.smsReceiveListener{
+public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener, SmsReceiveListener{
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
     private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
@@ -116,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         View v = findViewById(R.id.layoutView);
         sensorDetection();
         gps = new GPS(this,v);
+        SMSSender.setView(v);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
@@ -142,8 +146,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                 SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
             }
         });
-        phone = findViewById(R.id.phone);
-        phone.setText(SMSSender.getNumber());
         settingSMS = (Button) findViewById(R.id.settingSMS);
         settingSMS.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,6 +180,13 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         SMSSender.setNumber(phoneNumber);
         phone.setText(SMSSender.getNumber());
     }
+    @Override
+    public void returnSMS(String phoneNumber, String phoneMessage) {
+        SMSSender.setNumber(phoneNumber);
+        SMSSender.setMessage(phoneMessage);
+        SMSSender.sendSMS(this, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
+    }
+
 
 
     private void openCamera() {
@@ -428,9 +437,5 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
     }
 
 
-    @Override
-    public void returnSMS(String phoneNumber, String phoneMessage) {
-        SMSSender.setNumber(phoneNumber);
-        SMSSender.sendSMS(this, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
-    }
+
 }

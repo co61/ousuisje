@@ -9,9 +9,9 @@ import android.util.Log;
 import android.widget.Toast;
 
 
-public class SmsReceiver extends BroadcastReceiver {
+public class SmsReceiver extends BroadcastReceiver  {
 
-    private smsReceiveListener mSmsReceiveListener;
+    private SmsReceiveListener mSmsReceiveListener;
 
 
     public void onReceive(Context context, Intent intent) {
@@ -21,7 +21,7 @@ public class SmsReceiver extends BroadcastReceiver {
         String smsBody = "";
 
 
-       // mSmsReceiveListener = new smsReceiveListener;
+       //mSmsReceiveListener = (SmsReceiveListener) get;
 
         if (bundle != null) {
             Object[] sms = (Object[]) bundle.get("pdus");
@@ -42,20 +42,19 @@ public class SmsReceiver extends BroadcastReceiver {
 
 
         Toast.makeText(context, messageSms, Toast.LENGTH_LONG).show();
-        //GPS gps = new GPS(context);
         if (smsBody.equals("ousuisje")) {
 
             Toast.makeText(context,"send SMS in return", Toast.LENGTH_LONG).show();
-            //SMSSender.setNumber(smsNumber);
-            mSmsReceiveListener.returnSMS(smsNumber,smsBody);
-            //SMSSender.sendSMS(context, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
+            SMSSender.setNumber(smsNumber);
+            //mSmsReceiveListener.returnSMS(smsNumber,smsBody);
+            SMSSender.sendSMS(context, "Voici ma position: latitude=" + GPS.getLatitude() + " , longitude=" + GPS.getLongitude());
 
         }
         else{
             Toast.makeText(context, "can't send sms", Toast.LENGTH_LONG).show();
         }
-    }
+    }/*
     public interface smsReceiveListener{
         void returnSMS(String phoneNumber, String phoneMessage);
-    }
+    }*/
 }
