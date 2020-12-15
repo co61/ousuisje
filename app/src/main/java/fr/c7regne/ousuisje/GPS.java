@@ -26,15 +26,27 @@ public class GPS {
 
     private static final String TAG = "Test";
     public static Location loc;
-    private TextView txtLatitude, txtLongitude,txtAccuracy;
+    private static TextView txtLatitude;
+    private static TextView txtLongitude;
+    private static TextView txtAccuracy;
     private Button btnUpdateGPS,btnStopGPS;
 
     private LocationRequest locationRequest;
-    private FusedLocationProviderClient fusedLocationProviderClient;
+    private static FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallBack;
 
-    Context context;
+    static Context context;
     View v;
+
+    public GPS(Context c){
+        context=c;
+        locationRequest=new LocationRequest();
+        locationRequest.setInterval(3000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        getGPScoord();
+    }
 
     public GPS(Context c, View view) {
         //set context and view
@@ -84,7 +96,7 @@ public class GPS {
     }
 
     // get the gps coords
-    private void getGPScoord(){
+    private static void getGPScoord(){
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
@@ -100,17 +112,17 @@ public class GPS {
     }
 
     //update the view with the new coords
-    private void updateCoords(Location location) {
+    private static void updateCoords(Location location) {
         txtLatitude.setText(String.valueOf(location.getLatitude()));
         txtLongitude.setText(String.valueOf(location.getLongitude()));
         txtAccuracy.setText(String.valueOf(location.getAccuracy()));
     }
 
-    public String getLatitude(){
+    public static String getLatitude(){
         getGPScoord();
         return String.valueOf(loc.getLatitude());
     }
-    public String getLongitude(){
+    public static String getLongitude(){
         getGPScoord();
         return String.valueOf(loc.getLongitude());
     }
