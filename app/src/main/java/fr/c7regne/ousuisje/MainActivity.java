@@ -6,11 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.util.Log;
 import android.content.Context;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
@@ -52,15 +48,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import javax.net.ssl.SSLContext;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener, SmsReceiveListener{
+public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener{
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
-    private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
     private GPS gps;
-    private static final String TAG = "Test";
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
@@ -86,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
     // for saving file and send
     private File file;
     public static final int REQ_CAM_PERM = 200;
-    private boolean isFlashSupported;
     private Handler handler;
     private HandlerThread thread;
 
@@ -109,8 +101,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         }
     };
 
-    private static final int PERMISSONS_FINE_LOCATION = 1;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -121,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                Log.v("permission", "permission denied to ACCESS_FINE_LOCATION - requesting it");
                 requestPermissions(new String[]{
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.RECEIVE_SMS,
@@ -149,7 +138,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         settingSMS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //"0781071100"
                 openDialogNumber();
             }
         });
@@ -158,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
-                //takePicture();
                 SMSSender.sendSMS(getApplicationContext(), "AU SECOURS AIDEZ MOI , COORD : latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude()+"\nC'est urgent !!!!!!!!!!!!");
                 Toast.makeText(MainActivity.this, "Sending an urgence SMS", Toast.LENGTH_SHORT).show();
             }
@@ -168,9 +155,26 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         assert textureView != null;
         textureView.setSurfaceTextureListener(textureListener);
 
-        new FallDetection(this,mSensorManager, mAccelerometer);
 
-    }//onCreate()
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        startBackgroundThread();
+        new FallDetection(this,mSensorManager, mAccelerometer);
+        if(textureView.isAvailable())
+            openCamera();
+        else
+            textureView.setSurfaceTextureListener(textureListener);
+    }
+
+    @Override
+    protected void onPause() {
+        stopBackgroundThread();
+        super.onPause();
+    }
 
     private void openDialogNumber() {
         DialogNumber dialogNumber=new DialogNumber();
@@ -180,14 +184,33 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
     public void applyTexts(String phoneNumber) {
         SMSSender.setNumber(phoneNumber);
     }
-    @Override
-    public void returnSMS(String phoneNumber, String phoneMessage) {
-        SMSSender.setNumber(phoneNumber);
-        SMSSender.setMessage(phoneMessage);
-        SMSSender.sendSMS(this, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
+
+    void sensorDetection () {
+        mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE );
+        List<Sensor> deviceSensors = mSensorManager.getSensorList ( Sensor.TYPE_ALL );
+        if( deviceSensors != null && ! deviceSensors.isEmpty () ) {
+            if ( mSensorManager.getDefaultSensor ( Sensor.TYPE_ACCELEROMETER ) != null ){
+                mAccelerometer = mSensorManager.getDefaultSensor ( Sensor.TYPE_ACCELEROMETER );
+            }
+        }
     }
 
+    private void stopBackgroundThread() {
+        thread.quitSafely();
+        try{
+            thread.join();
+            thread= null;
+            handler= null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
+    private void startBackgroundThread() {
+        thread = new HandlerThread("Camera Background");
+        thread.start();
+        handler = new Handler(thread.getLooper());
+    }
 
     private void openCamera() {
         CameraManager manager = (CameraManager)getSystemService(Context.CAMERA_SERVICE);
@@ -197,7 +220,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
             StreamConfigurationMap map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
             assert map != null;
             imageSize = map.getOutputSizes(SurfaceTexture.class)[0];
-            //Check realtime permission if run higher API 23
             if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED)
             {
                 ActivityCompat.requestPermissions(this,new String[]{
@@ -234,39 +256,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
 
         }
     };
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        startBackgroundThread();
-        if(textureView.isAvailable())
-            openCamera();
-        else
-            textureView.setSurfaceTextureListener(textureListener);
-    }
-
-    @Override
-    protected void onPause() {
-        stopBackgroundThread();
-        super.onPause();
-    }
-
-    private void stopBackgroundThread() {
-        thread.quitSafely();
-        try{
-            thread.join();
-            thread= null;
-            handler= null;
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void startBackgroundThread() {
-        thread = new HandlerThread("Camera Background");
-        thread.start();
-        handler = new Handler(thread.getLooper());
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void takePicture() {
@@ -309,7 +298,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                 public void onImageAvailable(ImageReader reader) {
                     Image image =null;
                     try {
-                        Log.i("Text","1");
                         image = reader.acquireLatestImage();
                         ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                         byte[] bytes = new byte[buffer.capacity()];
@@ -326,7 +314,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                 private void save(byte[] bytes) throws IOException{
                     OutputStream outputStream=null;
                     try {
-                        Log.i("Text","2");
                         outputStream=new FileOutputStream(file);
                         outputStream.write(bytes);
                     }finally {
@@ -339,7 +326,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                 @Override
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
                     super.onCaptureCompleted(session, request, result);
-                    Log.i("Text","3");
                     Toast.makeText(MainActivity.this,"Saved "+file, Toast.LENGTH_SHORT).show();
                     createCameraPreview();
 
@@ -352,7 +338,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                     try {
                         cameraCaptureSession.capture(captureBuilder.build(),captureListener, handler );
                     } catch (CameraAccessException e) {
-                        Log.i("Text","4");
                         e.printStackTrace();
                     }
                 }
@@ -364,7 +349,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
             }, handler);
 
         }catch (CameraAccessException e){
-            Log.i("Text","5");
             e.printStackTrace();
         }
     }
@@ -384,7 +368,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
                     cameraCaptureSession = session;
                     updatePreview();
                 }
-
                 @Override
                 public void onConfigureFailed(@NonNull CameraCaptureSession session) {
                     Toast.makeText(MainActivity.this, "Changed", Toast.LENGTH_SHORT).show();
@@ -405,24 +388,6 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         }
     }
 
-    void sensorDetection () {
-
-        mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE );
-        List<Sensor> deviceSensors = mSensorManager.getSensorList ( Sensor.TYPE_ALL );
-        if( deviceSensors != null && ! deviceSensors.isEmpty () ) {
-            for ( Sensor mySensor : deviceSensors ) {
-                Log.v( TAG , " info :" + mySensor.toString () );
-            }
-            if ( mSensorManager.getDefaultSensor ( Sensor.TYPE_ACCELEROMETER ) != null ){
-                Log.v( TAG , " info : Accelerometer found !");
-                mAccelerometer = mSensorManager.getDefaultSensor ( Sensor.TYPE_ACCELEROMETER );
-
-            }
-            else {
-                Log.v( TAG , " info : Accelerometer not found !");
-            }
-        }
-    }
 
 
 
