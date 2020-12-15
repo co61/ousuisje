@@ -6,16 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
-import android.content.pm.PackageManager;
-import android.telephony.SmsManager;
-import android.util.Log;
-import android.widget.Switch;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.util.Log;
+import android.content.Context;
 import android.graphics.ImageFormat;
-import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -28,7 +25,6 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.location.Location;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
@@ -36,32 +32,18 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.MediaStore;
-import android.util.Log;
 import android.util.Size;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.Surface;
-import android.view.SurfaceHolder;
 import android.view.TextureView;
 import android.view.View;
-import android.view.accessibility.CaptioningManager;
 import android.widget.Button;
-import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOError;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -70,8 +52,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.net.ssl.SSLContext;
+
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DialogNumber.DialogListener, SmsReceiveListener{
     private static final int MY_PERMISSION_REQUEST_RECEIVE_SMS=0;
     private static final int MY_PERMISSION_REQUEST_SEND_SMS=50;
 
@@ -80,7 +64,8 @@ public class MainActivity extends AppCompatActivity {
     private SensorManager mSensorManager;
     private Sensor mAccelerometer;
 
-    private Button btnSendSMS,settingSMS,btnCamera;
+    private TextView phone;
+    private Button btnSendSMS,settingSMS,urgenceSms;
     private TextureView textureView;
     private static final SparseIntArray ORIENT=new SparseIntArray();
     static {
@@ -133,55 +118,74 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         View v = findViewById(R.id.layoutView);
         sensorDetection();
-        gps = new GPS(this,v);
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
-                String[] permissions = {Manifest.permission.RECEIVE_SMS};
-                requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
-            }
-            if (checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
-                String[] permissions = {Manifest.permission.SEND_SMS};
-                requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
-            }
             if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to ACCESS_FINE_LOCATION - requesting it");
-                String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-                requestPermissions(permissions, PERMISSONS_FINE_LOCATION);
+                Log.v("permission", "permission denied to ACCESS_FINE_LOCATION - requesting it");
+                requestPermissions(new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.RECEIVE_SMS,
+                        Manifest.permission.SEND_SMS}, MY_PERMISSION_REQUEST_RECEIVE_SMS);
             }
         }
 
+        gps = new GPS(this,v);
+        SMSSender.setView(v);
+        //to set num fo debug
+        SMSSender.setNumber("0781071100");
         btnSendSMS = (Button) findViewById(R.id.btn_sms);
         btnSendSMS.setOnClickListener(new View.OnClickListener()
         {
             public void onClick(View v) {
-                SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
+                try{
+                    SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
+                }catch (Exception e){
+                    Toast.makeText(MainActivity.this, "Can't have position, please retry", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
         settingSMS = (Button) findViewById(R.id.settingSMS);
         settingSMS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                SMSSender.setNumber("0781071100");
+                //"0781071100"
+                openDialogNumber();
             }
         });
-
-        btnCamera =findViewById(R.id.urgenceSMS);
-        textureView =findViewById(R.id.imageView);
-        assert textureView != null;
-        textureView.setSurfaceTextureListener(textureListener);
-        btnCamera.setOnClickListener(new View.OnClickListener() {
+        urgenceSms =findViewById(R.id.urgenceSMS);
+        urgenceSms.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View v) {
                 //takePicture();
+                SMSSender.sendSMS(getApplicationContext(), "AU SECOURS AIDEZ MOI , COORD : latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude()+"\nC'est urgent !!!!!!!!!!!!");
                 Toast.makeText(MainActivity.this, "Sending an urgence SMS", Toast.LENGTH_SHORT).show();
             }
         });
+
+        textureView =findViewById(R.id.imageView);
+        assert textureView != null;
+        textureView.setSurfaceTextureListener(textureListener);
+
         new FallDetection(this,mSensorManager, mAccelerometer);
+
     }//onCreate()
+
+    private void openDialogNumber() {
+        DialogNumber dialogNumber=new DialogNumber();
+        dialogNumber.show(getSupportFragmentManager(),"dialog");
+    }
+    @Override
+    public void applyTexts(String phoneNumber) {
+        SMSSender.setNumber(phoneNumber);
+    }
+    @Override
+    public void returnSMS(String phoneNumber, String phoneMessage) {
+        SMSSender.setNumber(phoneNumber);
+        SMSSender.setMessage(phoneMessage);
+        SMSSender.sendSMS(this, "Voici ma position: latitude=" + gps.getLatitude() + " , longitude=" + gps.getLongitude());
+    }
 
 
 
@@ -194,7 +198,7 @@ public class MainActivity extends AppCompatActivity {
             assert map != null;
             imageSize = map.getOutputSizes(SurfaceTexture.class)[0];
             //Check realtime permission if run higher API 23
-            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+            if(ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_DENIED)
             {
                 ActivityCompat.requestPermissions(this,new String[]{
                         Manifest.permission.CAMERA,
@@ -230,18 +234,6 @@ public class MainActivity extends AppCompatActivity {
 
         }
     };
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if(requestCode == REQ_CAM_PERM)
-        {
-            if(grantResults[0] != PackageManager.PERMISSION_GRANTED)
-            {
-                Toast.makeText(this, "You can't use camera without permission", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -431,4 +423,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
 }
