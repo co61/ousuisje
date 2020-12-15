@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
     private Sensor mAccelerometer;
 
     private TextView phone;
-    private Button btnSendSMS,settingSMS,btnCamera;
+    private Button btnSendSMS,settingSMS,btnCamera,trkgps;
     private TextureView textureView;
     private static final SparseIntArray ORIENT=new SparseIntArray();
     static {
@@ -121,28 +121,39 @@ public class MainActivity extends AppCompatActivity implements DialogNumber.Dial
         gps = new GPS(this,v);
         SMSSender.setView(v);
 
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
-                String[] permissions = {Manifest.permission.RECEIVE_SMS};
-                requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
+
+        trkgps = (Button)findViewById(R.id.btnUpdateGPS);
+        trkgps.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
+                        Log.d("permission", "permission denied to ACCESS_FINE_LOCATION - requesting it");
+                        String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
+                        requestPermissions(permissions, PERMISSONS_FINE_LOCATION);
+                    }
+                }
             }
-            if (checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
-                String[] permissions = {Manifest.permission.SEND_SMS};
-                requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
-            }
-            if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_DENIED) {
-                Log.d("permission", "permission denied to ACCESS_FINE_LOCATION - requesting it");
-                String[] permissions = {Manifest.permission.ACCESS_FINE_LOCATION};
-                requestPermissions(permissions, PERMISSONS_FINE_LOCATION);
-            }
-        }
+        });
 
         btnSendSMS = (Button) findViewById(R.id.btn_sms);
         btnSendSMS.setOnClickListener(new View.OnClickListener()
         {
+
             public void onClick(View v) {
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                    if (checkSelfPermission(Manifest.permission.RECEIVE_SMS) == PackageManager.PERMISSION_DENIED) {
+                        Log.d("permission", "permission denied to RECEIVE_SMS - requesting it");
+                        String[] permissions = {Manifest.permission.RECEIVE_SMS};
+                        requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
+                    }
+                    if (checkSelfPermission(Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_DENIED) {
+                        Log.d("permission", "permission denied to SEND_SMS - requesting it");
+                        String[] permissions = {Manifest.permission.SEND_SMS};
+                        requestPermissions(permissions, MY_PERMISSION_REQUEST_RECEIVE_SMS);
+                    }
+                }
+                gps.getGPScoord();
                 SMSSender.sendSMS(getApplicationContext(), "Voici ma position: latitude=" + gps.getLatitude()+ " , longitude=" + gps.getLongitude());
             }
         });

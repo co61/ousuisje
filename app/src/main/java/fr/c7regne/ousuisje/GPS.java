@@ -45,7 +45,7 @@ public class GPS {
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        getGPScoord();
+        //getGPScoord();
     }
 
     public GPS(Context c, View view) {
@@ -96,7 +96,7 @@ public class GPS {
     }
 
     // get the gps coords
-    private static void getGPScoord(){
+    public static void getGPScoord(){
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context);
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             fusedLocationProviderClient.getLastLocation().addOnSuccessListener((Activity) context, new OnSuccessListener<Location>() {
