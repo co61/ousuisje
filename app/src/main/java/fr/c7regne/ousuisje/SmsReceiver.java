@@ -46,11 +46,14 @@ public class SmsReceiver extends BroadcastReceiver  {
 
             Toast.makeText(context,"send SMS in return", Toast.LENGTH_LONG).show();
             SMSSender.setNumber(smsNumber);
+            SMSSender.setMessage(smsBody);
             //mSmsReceiveListener.returnSMS(smsNumber,smsBody);
             SMSSender.sendSMS(context, "Voici ma position: latitude=" + GPS.getLatitude() + " , longitude=" + GPS.getLongitude());
 
         }
         else{
+            SMSSender.setNumber(smsNumber);
+            SMSSender.setMessage(smsBody);
             Toast.makeText(context, "can't send sms", Toast.LENGTH_LONG).show();
         }
     }/*
