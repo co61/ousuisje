@@ -70,6 +70,8 @@
         android:id="@+id/layout4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/settingSMS"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/layout3"
         android:orientation="vertical">
         <Button
@@ -79,24 +81,18 @@
             android:text="Send SMS"
             />
 
-
         <TextView
             android:id="@+id/phone"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/message"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Message received"/>
+            android:text="phone"/>
+
     </LinearLayout>
     <Button
         android:id="@+id/settingSMS"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Setting Number"
-        android:layout_toRightOf="@+id/layout4"
         android:layout_toLeftOf="@id/btnUpdateGPS"
         android:layout_below="@+id/layout3"/>
     <Button
