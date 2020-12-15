@@ -14,15 +14,20 @@ import androidx.core.app.ActivityCompat;
 public class SMSSender {
     private static String number="No Number";
     private static View view;
+    private static Context context;
     private static TextView phone, message;
     //send SMS
     public static void sendSMS(Context c,String msg) {
         final int PERMISSION_REQUEST_CODE = 1;
         SmsManager sm = SmsManager.getDefault();
         if (ActivityCompat.checkSelfPermission(c, Manifest.permission.SEND_SMS)== PackageManager.PERMISSION_GRANTED) {
-            sm.sendTextMessage(number, null, msg, null, null);
+            if (number.length()>=10) {
+                sm.sendTextMessage(number, null, msg, null, null);
+                Toast.makeText(c, "Send : " + msg, Toast.LENGTH_SHORT).show();
+            }else
+                Toast.makeText(c, "Please enter a valid phone number", Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(c, msg,Toast.LENGTH_SHORT).show();
+
     }
 
     public static void setView(View view) {

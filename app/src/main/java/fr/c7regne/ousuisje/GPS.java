@@ -45,7 +45,7 @@ public class GPS {
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        //getGPScoord();
+        getGPScoord();
     }
 
     public GPS(Context c, View view) {
@@ -65,7 +65,7 @@ public class GPS {
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
-        //getGPScoord();
+        getGPScoord();
 
         //for setting tracking gps coord
         locationCallBack = new LocationCallback(){
